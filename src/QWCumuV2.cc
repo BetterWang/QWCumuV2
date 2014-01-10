@@ -136,10 +136,10 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	//
 	//cout << __LINE__ << "\t" << tracks_.label().c_str() << "\t|" << tracks_.instance() << "\t|" << tracks_.process() << endl;
 	//
-	cout << "!! before t" << endl;
+//	cout << "!! before t" << endl;
 	t = new QWEvent;
 	memset(t, 0, sizeof(QWEvent));
-	cout << "!! after t" << endl;
+//	cout << "!! after t" << endl;
 	//
 	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
@@ -155,13 +155,13 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 	}
-	cout << "!! before nt" << endl;
+//	cout << "!! before nt" << endl;
 
 	initQ();
-	cout << cq2->name() << endl;
+//	cout << cq2->name() << endl;
 	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
 
-	cout << "!! initQ" << endl;
+//	cout << "!! initQ" << endl;
 }
 
 
@@ -280,7 +280,7 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		while ( centbins[cbin+1] < bin*2.5+0.1 ) cbin++;
 	}
 	bin = cbin;
-	cout << "!!! Noff = " << Noff << endl;
+//	cout << "!!! Noff = " << Noff << endl;
 
 	// track
 	Handle<TrackCollection> tracks;
@@ -293,17 +293,17 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for(TrackCollection::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();                      
 			++itTrack) {
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		if ( itTrack->charge() == 0 ) continue;
 		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		double d0 = -1.* itTrack->dxy(v1);
 		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
 		double dz=itTrack->dz(v1);
 		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		if ( fabs( dz/dzerror ) > 3. ) continue;
 		if ( fabs( d0/derror ) > 3. ) continue;
@@ -322,12 +322,12 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 		*/
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		t->Charge[t->Mult] = itTrack->charge();
 		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) continue;
 		if ( (charge_ == -1) && (t->Charge[t->Mult]>0) ) continue;
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		t->Pt[t->Mult] = itTrack->pt();
 		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) continue;
 		t->Eta[t->Mult] = itTrack->eta();
@@ -340,7 +340,7 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			}
 		}
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		if ( bEff ) {
 			t->rEff[t->Mult] = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
 		} else {
@@ -354,27 +354,27 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( t->rEff[t->Mult] <= 0.1 or TMath::IsNaN(t->rEff[t->Mult]) ) continue;
 		double weight = (1.-t->rFak[t->Mult])/t->rEff[t->Mult];
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		double phi = itTrack->phi();
 
 		double wacc = 1.;
 		int ipt=0;
 		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		if ( bacc ) {
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 			wacc = 1./hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));
 		}
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		if ( bPhiEta ) hPhiEta[t->Cent][ipt][t->Charge[t->Mult]>0]->Fill(phi, t->Eta[t->Mult], wacc);
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		weight *= wacc;
 
 		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) continue;
 
 		t->weight[t->Mult] = weight;
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 
 		hdNdPtdEta[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult]);
 		hdNdPtdEtaPt[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult], t->Pt[t->Mult]);
@@ -382,10 +382,10 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Phi[t->Mult] = phi;
 		hPt[t->Cent]->Fill(t->Pt[t->Mult]);
 
-		cout << "!!! " << __LINE__ << endl;
+//		cout << "!!! " << __LINE__ << endl;
 		t->Mult++;
 	}
-	cout << "!!! done particle loop" << endl;
+//	cout << "!!! done particle loop" << endl;
 	for ( int i = 0; i < t->Mult; i++ ) {
 		q2.fill(t->Phi[i], t->weight[i]);
 		q3.fill(t->Phi[i], t->weight[i]);
@@ -400,23 +400,23 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	correlations::Result r36 = cq3->calculate(6, hc3);
 	correlations::Result r38 = cq3->calculate(8, hc3);
 
-	cout << "!! r22 : ";
-	r22.print();
-	cout << "!! r24 : ";
-	r24.print();
-	cout << "!! r26 : ";
-	r26.print();
-	cout << "!! r28 : ";
-	r28.print();
-
-	cout << "!! r32 : ";
-	r32.print();
-	cout << "!! r34 : ";
-	r34.print();
-	cout << "!! r36 : ";
-	r36.print();
-	cout << "!! r38 : ";
-	r38.print();
+//	cout << "!! r22 : ";
+//	r22.print();
+//	cout << "!! r24 : ";
+//	r24.print();
+//	cout << "!! r26 : ";
+//	r26.print();
+//	cout << "!! r28 : ";
+//	r28.print();
+//
+//	cout << "!! r32 : ";
+//	r32.print();
+//	cout << "!! r34 : ";
+//	r34.print();
+//	cout << "!! r36 : ";
+//	r36.print();
+//	cout << "!! r38 : ";
+//	r38.print();
 	
 	double C22,C24,C26,C28,iC22,iC24,iC26,iC28,wC22,wC24,wC26,wC28,C32,C34,C36,C38,iC32,iC34,iC36,iC38,wC32,wC34,wC36,wC38;
 

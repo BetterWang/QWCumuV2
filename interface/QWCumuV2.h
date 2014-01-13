@@ -86,9 +86,11 @@ class QWCumuV2 : public edm::EDAnalyzer {
 		bool	bacc;
 		bool	bPhiEta;
 		bool	bCentNoff;
+		bool	bSim_;
 		int 	Noffmin_;
 		int 	Noffmax_;
 		int	cmode_;
+		int	cweight_;
 
 		double	effCut_;
 		QWEvent * t;
@@ -118,6 +120,7 @@ class QWCumuV2 : public edm::EDAnalyzer {
 
 		void initQ();
 		void doneQ();
+		void Sim();
 };
 
 

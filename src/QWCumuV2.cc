@@ -84,11 +84,17 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	bEff = iConfig.getUntrackedParameter<bool>("bEff_", false);
 	bPhiEta = iConfig.getUntrackedParameter<bool>("bPhiEta_", false);
 	bCentNoff = iConfig.getUntrackedParameter<bool>("bCentNoff_", false);
-//	bHLTHM2013 = iConfig.getUntrackedParameter<bool>("bHLTHM2013_", false);
+	bSim_ = iConfig.getUntrackedParameter<bool>("bSim_", false);
 	Noffmin_ = iConfig.getUntrackedParameter<int>("Noffmin_", 0);
 	Noffmax_ = iConfig.getUntrackedParameter<int>("Noffmax_", 10000);
 	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
+	cweight_ = iConfig.getUntrackedParameter<int>("cweight_", 1);
+
+	if ( cweight_ == 0 ) {
+		q2 = correlations::QVector(0, 0, false);
+		q3 = correlations::QVector(0, 0, false);
+	}
 
 	string streff = fweight_.label();
 	if ( streff == string("NA") ) {
@@ -386,9 +392,14 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Mult++;
 	}
 //	cout << "!!! done particle loop" << endl;
+	if ( bSim_ ) Sim();
 	for ( int i = 0; i < t->Mult; i++ ) {
+//		cout << "!! Phi[" << i << "] = " << t->Phi[i] << "\t\tweight[" << i << "] = " << t->weight[i] << endl;
 		q2.fill(t->Phi[i], t->weight[i]);
 		q3.fill(t->Phi[i], t->weight[i]);
+//		for ( int n = -2; n < 2; n++ )
+//			for ( int p = 0; p < 8; p++ )
+//				cout << "!! Q2{" << n << ", " << p << "} = " << q2(n,p) << endl;
 	}
 	correlations::Result r22 = cq2->calculate(2, hc2);
 	correlations::Result r24 = cq2->calculate(4, hc2);
@@ -505,6 +516,28 @@ QWCumuV2::doneQ()
 {
 	q2.reset();
 	q3.reset();
+}
+
+void
+QWCumuV2::Sim()
+{
+	// QC{2} = -0.071428
+	// QC{4} = -0.007142
+	// QC{6} = 0.0357142
+	// QC{8} = 0.0571429
+	t->Cent = 100;
+	t->Mult = 8;
+	for ( int i = 0; i < 8; i++ ) {
+		t->weight[i] = 1.;
+	}
+	t->Phi[0] = -Pi;
+	t->Phi[1] = -Pi*5/6.;
+	t->Phi[2] = -Pi/2.;
+	t->Phi[3] = -Pi/6.;
+	t->Phi[4] = 0;
+	t->Phi[5] = Pi/6.;
+	t->Phi[6] = Pi/2.;
+	t->Phi[7] = Pi*5/6.;
 }
 
 // ------------ method called once each job just before starting event loop  ------------

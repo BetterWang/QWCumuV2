@@ -1,4 +1,4 @@
-#define CORRELATIONS_CLOSED_ENABLE_U8 1
+//#define CORRELATIONS_CLOSED_ENABLE_U8 1
 #include <QWAna/QWCumuV2/interface/correlations/Types.hh>
 #include <QWAna/QWCumuV2/interface/correlations/Result.hh>
 #include <QWAna/QWCumuV2/interface/correlations/QVector.hh>
@@ -30,6 +30,7 @@ typedef struct QWEvent_ {
 	int     Cent;
 	int     Mult;
 	double  vz;
+	int 	Noff;
 	double  Pt[NMAX_TRK];
 	double  Eta[NMAX_TRK];
 	double  Phi[NMAX_TRK];
@@ -51,6 +52,8 @@ class QWCumuV2 : public edm::EDAnalyzer {
 	private:
 		virtual void beginJob() ;
 		virtual void analyze(const edm::Event&, const edm::EventSetup&);
+		virtual void analyzeData(const edm::Event&, const edm::EventSetup&);
+		virtual void analyzeGen(const edm::Event&, const edm::EventSetup&);
 		virtual void endJob() ;
 
 		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
@@ -91,6 +94,7 @@ class QWCumuV2 : public edm::EDAnalyzer {
 		int 	Noffmax_;
 		int	cmode_;
 		int	cweight_;
+		bool	bGen_;
 
 		double	effCut_;
 		QWEvent * t;

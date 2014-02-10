@@ -34,6 +34,7 @@ Implementation:
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -90,6 +91,7 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	effCut_ = iConfig.getUntrackedParameter<double>("effCut_", -1.0);
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
 	cweight_ = iConfig.getUntrackedParameter<int>("cweight_", 1);
+	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
 
 	if ( cweight_ == 0 ) {
 		q2 = correlations::QVector(0, 0, false);
@@ -241,165 +243,15 @@ QWCumuV2::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 	return cent;
 }
 
-// ------------ method called for each event  ------------
-	void
+
+void
 QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-	using namespace edm;
-	using namespace reco;
-
-	// vertex
-	Handle<VertexCollection> vertexCollection;
-	iEvent.getByLabel(vertexSrc_, vertexCollection);
-	const VertexCollection * recoVertices = vertexCollection.product();
-
-	int primaryvtx = 0;
-	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
-	double vxError = (*recoVertices)[primaryvtx].xError();
-	double vyError = (*recoVertices)[primaryvtx].yError();
-	double vzError = (*recoVertices)[primaryvtx].zError();
-
-//	for ( unsigned int i = 0; i < recoVertices->size(); i++ ) {
-//		size_t daughter = (*recoVertices)[i].tracksSize();
-//		cout << "i = " << i << "\tnTracks = " << daughter <<"\t vz = " << (*recoVertices)[i].position().z() << endl;
-//		//cout << "i = " << i << "\ttrkSize = " << "\t vz = " << (*recoVertices)[i].position().z() << endl;
-//	}
-	double vz = (*recoVertices)[primaryvtx].z();
-	if (vz < minvz_ || vz > maxvz_) {
-		return;
-	}
-	
-	// centrality
-	int bin = 0;
-	int cbin = 0;
-	int Noff = 0;
-
-	if ( bCentNoff ) {
-		cbin = getNoffCent( iEvent, iSetup, Noff);
-		if ( (Noff < Noffmin_) or (Noff >= Noffmax_) ) {
-			return;
-		}
-	} else {
-		edm::Handle<int> ch;
-		iEvent.getByLabel(centrality_,ch);
-		bin = *(ch.product());
-		while ( centbins[cbin+1] < bin*2.5+0.1 ) cbin++;
-	}
-	bin = cbin;
-//	cout << "!!! Noff = " << Noff << endl;
-
-	// track
-	Handle<TrackCollection> tracks;
-	iEvent.getByLabel(tracks_,tracks);
-	t->Mult = 0;
-	t->Cent = bin;
-	t->vz = vz;
-	//cout << __LINE__ << "\t" << bin << endl;
-
-	for(TrackCollection::const_iterator itTrack = tracks->begin();
-			itTrack != tracks->end();                      
-			++itTrack) {
-//		cout << "!!! " << __LINE__ << endl;
-		if ( itTrack->charge() == 0 ) continue;
-		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
-
-//		cout << "!!! " << __LINE__ << endl;
-		double d0 = -1.* itTrack->dxy(v1);
-		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
-		double dz=itTrack->dz(v1);
-		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
-
-//		cout << "!!! " << __LINE__ << endl;
-		if ( fabs(itTrack->eta()) > 2.4 ) continue;
-		if ( fabs( dz/dzerror ) > 3. ) continue;
-		if ( fabs( d0/derror ) > 3. ) continue;
-		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-		/*
-		bool b_pix = itTrack->numberOfValidHits() < 7;
-		if ( b_pix ) {
-			if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
-			if ( itTrack->normalizedChi2() > chi2_ ) continue;
-		} else {
-			// full track
-			if ( fabs( dz/dzerror ) > 3. ) continue;
-			if ( fabs( d0/derror ) > 3. ) continue;
-			if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
-			if ( itTrack->numberOfValidHits() < 12 ) continue;
-		}
-		*/
-
-//		cout << "!!! " << __LINE__ << endl;
-		t->Charge[t->Mult] = itTrack->charge();
-		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) continue;
-		if ( (charge_ == -1) && (t->Charge[t->Mult]>0) ) continue;
-
-//		cout << "!!! " << __LINE__ << endl;
-		t->Pt[t->Mult] = itTrack->pt();
-		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) continue;
-		t->Eta[t->Mult] = itTrack->eta();
-//		if ( (t->Eta[t->Mult] < etabins[0]) || (t->Eta[t->Mult] >= etabins[nEtaBins]) ) continue;
-
-		if (effCut_>0.)  {
-			double eff = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
-			if ( eff > effCut_ ) {
-				if ( gRandom->Rndm() < (eff-effCut_)/eff ) continue;
-			}
-		}
-
-//		cout << "!!! " << __LINE__ << endl;
-		if ( bEff ) {
-			t->rEff[t->Mult] = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
-		} else {
-			t->rEff[t->Mult] = 1.;
-		}
-		if ( bFak ) {
-			t->rFak[t->Mult] = hFak_cbin[bin]->GetBinContent( hFak_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
-		} else {
-			t->rFak[t->Mult] = 0.;
-		}
-		if ( t->rEff[t->Mult] <= 0.1 or TMath::IsNaN(t->rEff[t->Mult]) ) continue;
-		double weight = (1.-t->rFak[t->Mult])/t->rEff[t->Mult];
-
-//		cout << "!!! " << __LINE__ << endl;
-		double phi = itTrack->phi();
-
-		double wacc = 1.;
-		int ipt=0;
-		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
-//		cout << "!!! " << __LINE__ << endl;
-		if ( bacc ) {
-//		cout << "!!! " << __LINE__ << endl;
-			wacc = 1./hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));
-		}
-//		cout << "!!! " << __LINE__ << endl;
-		if ( bPhiEta ) hPhiEta[t->Cent][ipt][t->Charge[t->Mult]>0]->Fill(phi, t->Eta[t->Mult], wacc);
-
-//		cout << "!!! " << __LINE__ << endl;
-		weight *= wacc;
-
-		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) continue;
-
-		t->weight[t->Mult] = weight;
-//		cout << "!!! " << __LINE__ << endl;
-
-		hdNdPtdEta[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult]);
-		hdNdPtdEtaPt[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult], t->Pt[t->Mult]);
-
-		t->Phi[t->Mult] = phi;
-		hPt[t->Cent]->Fill(t->Pt[t->Mult]);
-
-//		cout << "!!! " << __LINE__ << endl;
-		t->Mult++;
-	}
-//	cout << "!!! done particle loop" << endl;
-	if ( bSim_ ) Sim();
+	if ( bGen_ ) analyzeGen(iEvent, iSetup);
+	else analyzeData(iEvent, iSetup);
 	for ( int i = 0; i < t->Mult; i++ ) {
-//		cout << "!! Phi[" << i << "] = " << t->Phi[i] << "\t\tweight[" << i << "] = " << t->weight[i] << endl;
 		q2.fill(t->Phi[i], t->weight[i]);
 		q3.fill(t->Phi[i], t->weight[i]);
-//		for ( int n = -2; n < 2; n++ )
-//			for ( int p = 0; p < 8; p++ )
-//				cout << "!! Q2{" << n << ", " << p << "} = " << q2(n,p) << endl;
 	}
 	correlations::Result r22 = cq2->calculate(2, hc2);
 	correlations::Result r24 = cq2->calculate(4, hc2);
@@ -411,24 +263,6 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	correlations::Result r36 = cq3->calculate(6, hc3);
 	correlations::Result r38 = cq3->calculate(8, hc3);
 
-//	cout << "!! r22 : ";
-//	r22.print();
-//	cout << "!! r24 : ";
-//	r24.print();
-//	cout << "!! r26 : ";
-//	r26.print();
-//	cout << "!! r28 : ";
-//	r28.print();
-//
-//	cout << "!! r32 : ";
-//	r32.print();
-//	cout << "!! r34 : ";
-//	r34.print();
-//	cout << "!! r36 : ";
-//	r36.print();
-//	cout << "!! r38 : ";
-//	r38.print();
-	
 	double C22,C24,C26,C28,iC22,iC24,iC26,iC28,wC22,wC24,wC26,wC28,C32,C34,C36,C38,iC32,iC34,iC36,iC38,wC32,wC34,wC36,wC38;
 
 	C22 = r22._sum.real();
@@ -461,12 +295,188 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	wC36 = r36._weights;
 	wC38 = r38._weights;
 
-	double res[27] = { double(Noff), double(t->Mult), double(t->Cent),
+	double res[27] = { double(t->Noff), double(t->Mult), double(t->Cent),
 		C22,C24,C26,C28,iC22,iC24,iC26,iC28,wC22,wC24,wC26,wC28,C32,C34,C36,C38,iC32,iC34,iC36,iC38,wC32,wC34,wC36,wC38};
 
 	ntResult->Fill(res);
 
 	doneQ();
+
+}
+
+
+void
+QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+	using namespace edm;
+	using namespace reco;
+
+	// track
+	Handle<std::vector<GenParticle>> tracks;
+	iEvent.getByLabel(tracks_,tracks);
+	t->Noff = 0;
+	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
+			itTrack != tracks->end();
+			++itTrack
+			)
+	{
+		cout << "!! " << __LINE__ << endl;
+		if ( !itTrack->longLived() ) continue;
+		if ( itTrack->charge() == 0 ) continue;
+		if ( fabs(itTrack->eta()) > 2.4 ) continue;
+		if ( itTrack->pt() < 0.4 ) continue;
+		t->Noff++;
+	}
+	t->Cent = 0;
+	t->Mult = 0;
+	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
+			itTrack != tracks->end();
+			++itTrack
+			)
+	{
+		cout << "!! " << __LINE__ << endl;
+		if ( !itTrack->longLived() ) continue;
+		if ( itTrack->charge() == 0 ) continue;
+		if ( fabs(itTrack->eta()) > 2.4 ) continue;
+		t->Pt[t->Mult] = itTrack->pt();
+		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) continue;
+
+		t->weight[t->Mult] = 1.;
+		t->Phi[t->Mult] = itTrack->phi();
+
+		t->Mult++;
+	}
+}
+
+
+// ------------ method called for each event  ------------
+	void
+QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+	using namespace edm;
+	using namespace reco;
+
+	// vertex
+	Handle<VertexCollection> vertexCollection;
+	iEvent.getByLabel(vertexSrc_, vertexCollection);
+	const VertexCollection * recoVertices = vertexCollection.product();
+
+	int primaryvtx = 0;
+	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
+	double vxError = (*recoVertices)[primaryvtx].xError();
+	double vyError = (*recoVertices)[primaryvtx].yError();
+	double vzError = (*recoVertices)[primaryvtx].zError();
+
+//	for ( unsigned int i = 0; i < recoVertices->size(); i++ ) {
+//		size_t daughter = (*recoVertices)[i].tracksSize();
+//		cout << "i = " << i << "\tnTracks = " << daughter <<"\t vz = " << (*recoVertices)[i].position().z() << endl;
+//		//cout << "i = " << i << "\ttrkSize = " << "\t vz = " << (*recoVertices)[i].position().z() << endl;
+//	}
+	double vz = (*recoVertices)[primaryvtx].z();
+	if (vz < minvz_ || vz > maxvz_) {
+		return;
+	}
+	
+	// centrality
+	int bin = 0;
+	int cbin = 0;
+	t->Noff = 0;
+
+	if ( bCentNoff ) {
+		cbin = getNoffCent( iEvent, iSetup, t->Noff);
+		if ( (t->Noff < Noffmin_) or (t->Noff >= Noffmax_) ) {
+			return;
+		}
+	} else {
+		edm::Handle<int> ch;
+		iEvent.getByLabel(centrality_,ch);
+		bin = *(ch.product());
+		while ( centbins[cbin+1] < bin*2.5+0.1 ) cbin++;
+	}
+	bin = cbin;
+
+	// track
+	Handle<TrackCollection> tracks;
+	iEvent.getByLabel(tracks_,tracks);
+	t->Mult = 0;
+	t->Cent = bin;
+	t->vz = vz;
+	//cout << __LINE__ << "\t" << bin << endl;
+
+	for(TrackCollection::const_iterator itTrack = tracks->begin();
+			itTrack != tracks->end();                      
+			++itTrack) {
+//		cout << "!!! " << __LINE__ << endl;
+		if ( itTrack->charge() == 0 ) continue;
+		if ( !itTrack->quality(reco::TrackBase::highPurity) ) continue;
+
+//		cout << "!!! " << __LINE__ << endl;
+		double d0 = -1.* itTrack->dxy(v1);
+		double derror=sqrt(itTrack->dxyError()*itTrack->dxyError()+vxError*vyError);
+		double dz=itTrack->dz(v1);
+		double dzerror=sqrt(itTrack->dzError()*itTrack->dzError()+vzError*vzError);
+
+//		cout << "!!! " << __LINE__ << endl;
+		if ( fabs(itTrack->eta()) > 2.4 ) continue;
+		if ( fabs( dz/dzerror ) > 3. ) continue;
+		if ( fabs( d0/derror ) > 3. ) continue;
+		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
+
+//		cout << "!!! " << __LINE__ << endl;
+		t->Charge[t->Mult] = itTrack->charge();
+		if ( (charge_ == 1) && (t->Charge[t->Mult]<0) ) continue;
+		if ( (charge_ == -1) && (t->Charge[t->Mult]>0) ) continue;
+
+//		cout << "!!! " << __LINE__ << endl;
+		t->Pt[t->Mult] = itTrack->pt();
+		if ( t->Pt[t->Mult] >= ptbins[nPtBins] || t->Pt[t->Mult] <= ptbins[0] ) continue;
+		t->Eta[t->Mult] = itTrack->eta();
+
+		if (effCut_>0.)  {
+			double eff = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) ) ;
+			if ( eff > effCut_ ) {
+				if ( gRandom->Rndm() < (eff-effCut_)/eff ) continue;
+			}
+		}
+
+		if ( bEff ) {
+			t->rEff[t->Mult] = hEff_cbin[bin]->GetBinContent( hEff_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
+		} else {
+			t->rEff[t->Mult] = 1.;
+		}
+		if ( bFak ) {
+			t->rFak[t->Mult] = hFak_cbin[bin]->GetBinContent( hFak_cbin[bin]->FindBin(t->Eta[t->Mult], t->Pt[t->Mult] ) );
+		} else {
+			t->rFak[t->Mult] = 0.;
+		}
+		if ( t->rEff[t->Mult] <= 0.1 or TMath::IsNaN(t->rEff[t->Mult]) ) continue;
+		double weight = (1.-t->rFak[t->Mult])/t->rEff[t->Mult];
+
+		double phi = itTrack->phi();
+
+		double wacc = 1.;
+		int ipt=0;
+		while ( t->Pt[t->Mult] > ptbins[ipt+1] ) ipt++;
+		if ( bacc ) {
+			wacc = 1./hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->GetBinContent(hacc[t->Cent][ipt][t->Charge[t->Mult]>0]->FindBin(phi, t->Eta[t->Mult]));
+		}
+		if ( bPhiEta ) hPhiEta[t->Cent][ipt][t->Charge[t->Mult]>0]->Fill(phi, t->Eta[t->Mult], wacc);
+
+		weight *= wacc;
+
+		if ( (t->Pt[t->Mult] < rfpptmin_) || (t->Pt[t->Mult] > rfpptmax_) || itTrack->eta() < rfpmineta_ || itTrack->eta() > rfpmaxeta_ ) continue;
+
+		t->weight[t->Mult] = weight;
+
+		hdNdPtdEta[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult]);
+		hdNdPtdEtaPt[bin]->Fill(t->Eta[t->Mult], t->Pt[t->Mult], t->Pt[t->Mult]);
+
+		t->Phi[t->Mult] = phi;
+		hPt[t->Cent]->Fill(t->Pt[t->Mult]);
+
+		t->Mult++;
+	}
+	if ( bSim_ ) Sim();
 }
 
 

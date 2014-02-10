@@ -320,8 +320,7 @@ QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			++itTrack
 			)
 	{
-		cout << "!! " << __LINE__ << endl;
-		if ( !itTrack->longLived() ) continue;
+		if ( itTrack->status()!=1 ) continue;
 		if ( itTrack->charge() == 0 ) continue;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		if ( itTrack->pt() < 0.4 ) continue;
@@ -334,8 +333,7 @@ QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			++itTrack
 			)
 	{
-		cout << "!! " << __LINE__ << endl;
-		if ( !itTrack->longLived() ) continue;
+		if ( itTrack->status()!=1 ) continue;
 		if ( itTrack->charge() == 0 ) continue;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		t->Pt[t->Mult] = itTrack->pt();

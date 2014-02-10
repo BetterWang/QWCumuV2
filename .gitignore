@@ -2,3 +2,4 @@ bin/
 PbPb
 test/*
 !test/qw*.py
+python/*

@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.Generator_cff')
 process.load('GeneratorInterface.HiGenCommon.VtxSmearedRealisticPPbBoost8TeVCollision_cff')
 
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(200000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:startup', '')
@@ -73,10 +73,15 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('cumuHijing.root')
 )
 
+process.pgen_hijing = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.VertexSmearing+process.GeneInfo)
+
+from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
+randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService)
+randSvc.populate()
 
 
 #process.generation_step = cms.Path(process.pgen)
-process.generation_step = cms.Path(process.pgen+process.cumulant)
+process.generation_step = cms.Path(process.pgen_hijing+process.cumulant)
 
 #process.p = cms.Path(process.generation_step, process.cumulant)
 #	process.generation_step + process.cumulant

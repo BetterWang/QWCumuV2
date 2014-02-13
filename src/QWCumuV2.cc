@@ -318,7 +318,7 @@ QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	using namespace reco;
 
 	// track
-	Handle<std::vector<GenParticle>> tracks;
+	Handle< std::vector<GenParticle> > tracks;
 	iEvent.getByLabel(tracks_,tracks);
 	t->Noff = 0;
 	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();

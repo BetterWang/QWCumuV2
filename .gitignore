@@ -1,4 +1,4 @@
 bin/
-test/
+test/*
 !test/qw*.py
 

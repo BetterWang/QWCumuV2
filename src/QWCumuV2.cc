@@ -111,8 +111,14 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 			if ( bFak ) cout << "!!! Apply Fak correction" << endl;
 			if ( bEff ) cout << "!!! Apply Eff correction" << endl;
 			for ( int i = 0; i < 20; i++ ) {
-				hEff_cbin[i] = (TH2D*) fEffFak->Get("rTotalEff3D");
-				hFak_cbin[i] = (TH2D*) fEffFak->Get(Form("rFak_cbin%i", i));
+				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") ) {
+					hEff_cbin[i] = (TH2D*) fEffFak->Get("rTotalEff3D");
+					hFak_cbin[i] = (TH2D*) fEffFak->Get(Form("rFak_cbin%i", i));
+				}
+				if ( streff == string("trkEffNew2012_HI_hiGoodTightMerged_xsec_smoothv5true.root") ) {
+					hEff_cbin[i] = (TH2D*) fEffFak->Get("Tot_4");
+					hFak_cbin[i] = (TH2D*) fEffFak->Get("Fak_4");
+				}
 			}
 			cout << "!!! eff histo done" << endl;
 		}

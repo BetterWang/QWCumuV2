@@ -56,7 +56,7 @@ process.cumulant = cms.EDAnalyzer('QWCumuV2'
 	, pterrorpt_ = cms.untracked.double(0.1)
 	, Noffmin_ = cms.untracked.int32(0)
 	, Noffmax_ = cms.untracked.int32(500)
-	, fweight_ = cms.untracked.InputTag('trkEffNew2012_HI_hiGoodTightMerged_xsec_smoothv5true.root')
+	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
 	, bEff_ = cms.untracked.bool(True)
 	, cmode_ = cms.untracked.int32(1)
 )

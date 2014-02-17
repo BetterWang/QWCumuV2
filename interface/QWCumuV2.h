@@ -1,4 +1,4 @@
-//#define CORRELATIONS_CLOSED_ENABLE_U8 1
+#define CORRELATIONS_CLOSED_ENABLE_U8 1
 #include <QWAna/QWCumuV2/interface/correlations/Types.hh>
 #include <QWAna/QWCumuV2/interface/correlations/Result.hh>
 #include <QWAna/QWCumuV2/interface/correlations/QVector.hh>

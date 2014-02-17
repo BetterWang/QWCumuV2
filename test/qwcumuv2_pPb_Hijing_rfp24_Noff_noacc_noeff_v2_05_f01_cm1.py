@@ -17,6 +17,7 @@ process.load('Configuration.EventContent.EventContentHeavyIons_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('GeneratorInterface.HiGenCommon.VtxSmearedRealisticPPbBoost8TeVCollision_cff')
+process.load('GeneratorInterface.HiGenCommon.AfterBurnerGenerator_cff')
 
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(200000))
@@ -69,11 +70,17 @@ process.cumulant = cms.EDAnalyzer('QWCumuV2'
 	, bGen_ = cms.untracked.bool(True)
 )
 
+process.AftBurner.modv1 = cms.InputTag("0.0")
+process.AftBurner.modv2 = cms.InputTag("0.05")
+process.AftBurner.fluct_v1 = cms.double(0.0)
+process.AftBurner.fluct_v1 = cms.double(0.01)
+process.AftBurner.modmethod = cms.int32(1)
+
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('cumuHijing.root')
 )
 
-process.pgen_hijing = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.VertexSmearing+process.GeneInfo)
+process.pgen_hijing = cms.Sequence(cms.SequencePlaceholder("randomEngineStateProducer")+process.VertexSmearing+process.AfterBurner+process.GeneInfo)
 
 from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
 randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService)

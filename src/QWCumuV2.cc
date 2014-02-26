@@ -66,10 +66,10 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	//now do what ever initialization is needed
 	minvz_ = iConfig.getUntrackedParameter<double>("minvz_", -15.);
 	maxvz_ = iConfig.getUntrackedParameter<double>("maxvz_", 15.);
-	dzdzerror_ = iConfig.getUntrackedParameter<double>("dzdzerror_", 10.);
-	//d0d0error_ = iConfig.getUntrackedParameter<double>("d0d0error_", 3.);
+	dzdzerror_ = iConfig.getUntrackedParameter<double>("dzdzerror_", 3.);
+	d0d0error_ = iConfig.getUntrackedParameter<double>("d0d0error_", 3.);
 	chi2_ = iConfig.getUntrackedParameter<double>("chi2_", 40);
-	pterrorpt_ = iConfig.getUntrackedParameter<double>("pterrorpt_", 0.05);
+	pterrorpt_ = iConfig.getUntrackedParameter<double>("pterrorpt_", 0.1);
 	rfpmineta_ = iConfig.getUntrackedParameter<double>("rfpmineta_", -2.);
 	rfpmaxeta_ = iConfig.getUntrackedParameter<double>("rfpmaxeta_", 2.);
 	poimineta_ = iConfig.getUntrackedParameter<double>("poimineta_", rfpmineta_);
@@ -92,6 +92,7 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode_", 1);
 	cweight_ = iConfig.getUntrackedParameter<int>("cweight_", 1);
 	bGen_ = iConfig.getUntrackedParameter<bool>("bGen_", false);
+	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx_", 100);
 
 	if ( cweight_ == 0 ) {
 		q2 = correlations::QVector(0, 0, false);
@@ -228,7 +229,7 @@ QWCumuV2::getNoffCent(const edm::Event& iEvent, const edm::EventSetup& iSetup, i
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
 		if ( fabs( dz/dzerror ) > 3. ) continue;
 		if ( fabs( d0/derror ) > 3. ) continue;
-		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
+		if ( itTrack->ptError()/itTrack->pt() > 0.1 ) continue;
 //		bool b_pix = itTrack->numberOfValidHits() < 7;
 //		if ( b_pix ) {
 //			if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
@@ -364,6 +365,7 @@ QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByLabel(vertexSrc_, vertexCollection);
 	const VertexCollection * recoVertices = vertexCollection.product();
+	if ( recoVertices->size() > nvtx_ ) return;
 
 	int primaryvtx = 0;
 	math::XYZPoint v1( (*recoVertices)[primaryvtx].position().x(), (*recoVertices)[primaryvtx].position().y(), (*recoVertices)[primaryvtx].position().z() );
@@ -377,7 +379,7 @@ QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //		//cout << "i = " << i << "\ttrkSize = " << "\t vz = " << (*recoVertices)[i].position().z() << endl;
 //	}
 	double vz = (*recoVertices)[primaryvtx].z();
-	if (vz < minvz_ || vz > maxvz_) {
+	if (fabs(vz) < minvz_ || fabs(vz) > maxvz_) {
 		return;
 	}
 	
@@ -422,8 +424,8 @@ QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 //		cout << "!!! " << __LINE__ << endl;
 		if ( fabs(itTrack->eta()) > 2.4 ) continue;
-		if ( fabs( dz/dzerror ) > 3. ) continue;
-		if ( fabs( d0/derror ) > 3. ) continue;
+		if ( fabs( dz/dzerror ) > dzdzerror_ ) continue;
+		if ( fabs( d0/derror ) > d0d0error_ ) continue;
 		if ( itTrack->ptError()/itTrack->pt() > pterrorpt_ ) continue;
 
 //		cout << "!!! " << __LINE__ << endl;

@@ -123,7 +123,8 @@ process.cumulant100 = cms.EDAnalyzer('QWCumuV2'
 	, Noffmax_ = cms.untracked.int32(150)
 	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
 	, bEff_ = cms.untracked.bool(True)
-	, cmode_ = cms.untracked.int32(2)
+	, cmode_ = cms.untracked.int32(1)
+	, nvtx_ = cms.untracked.int32(1)
 )
 
 process.cumulant130 = process.cumulant100.clone()

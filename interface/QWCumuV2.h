@@ -75,7 +75,7 @@ class QWCumuV2 : public edm::EDAnalyzer {
 	/////////////////////////////////////////////
 		double 	minvz_, maxvz_;
 		double 	dzdzerror_;
-		//double 	d0d0error_;
+		double 	d0d0error_;
 		double 	chi2_;
 		double 	pterrorpt_;
 		double 	rfpmineta_, rfpmaxeta_;
@@ -95,6 +95,8 @@ class QWCumuV2 : public edm::EDAnalyzer {
 		int	cmode_;
 		int	cweight_;
 		bool	bGen_;
+
+		unsigned int	nvtx_;
 
 		double	effCut_;
 		QWEvent * t;

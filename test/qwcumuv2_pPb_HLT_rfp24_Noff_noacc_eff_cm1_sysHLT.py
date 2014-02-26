@@ -54,7 +54,7 @@ process.hltHM100.throw = cms.bool(False)
 
 process.hltHM130 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM130.HLTPaths = [
-	"HLT_PAPixelTracks_Multiplicity100_v*",
+#	"HLT_PAPixelTracks_Multiplicity100_v*",
 	"HLT_PAPixelTracks_Multiplicity130_v*",
 #	"HLT_PAPixelTracks_Multiplicity160_v*",
 ##	"HLT_PAPixelTracks_Multiplicity190_v*",
@@ -66,8 +66,8 @@ process.hltHM130.throw = cms.bool(False)
 
 process.hltHM160 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM160.HLTPaths = [
-	"HLT_PAPixelTracks_Multiplicity100_v*",
-	"HLT_PAPixelTracks_Multiplicity130_v*",
+#	"HLT_PAPixelTracks_Multiplicity100_v*",
+#	"HLT_PAPixelTracks_Multiplicity130_v*",
 	"HLT_PAPixelTracks_Multiplicity160_v*",
 #	"HLT_PAPixelTracks_Multiplicity190_v*",
 #	"HLT_PAPixelTracks_Multiplicity220_v*"
@@ -80,9 +80,9 @@ process.hltHM160.throw = cms.bool(False)
 
 process.hltHM190 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM190.HLTPaths = [
-	"HLT_PAPixelTracks_Multiplicity100_v*",
-	"HLT_PAPixelTracks_Multiplicity130_v*",
-	"HLT_PAPixelTracks_Multiplicity160_v*",
+#	"HLT_PAPixelTracks_Multiplicity100_v*",
+#	"HLT_PAPixelTracks_Multiplicity130_v*",
+#	"HLT_PAPixelTracks_Multiplicity160_v*",
 	"HLT_PAPixelTracks_Multiplicity190_v*",
 #	"HLT_PAPixelTracks_Multiplicity220_v*"
 ]
@@ -93,10 +93,10 @@ process.hltHM190.throw = cms.bool(False)
 
 process.hltHM220 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltHM220.HLTPaths = [
-	"HLT_PAPixelTracks_Multiplicity100_v*",
-	"HLT_PAPixelTracks_Multiplicity130_v*",
-	"HLT_PAPixelTracks_Multiplicity160_v*",
-	"HLT_PAPixelTracks_Multiplicity190_v*",
+#	"HLT_PAPixelTracks_Multiplicity100_v*",
+#	"HLT_PAPixelTracks_Multiplicity130_v*",
+#	"HLT_PAPixelTracks_Multiplicity160_v*",
+#	"HLT_PAPixelTracks_Multiplicity190_v*",
 	"HLT_PAPixelTracks_Multiplicity220_v*"
 ]
 process.hltHM220.andOr = cms.bool(True)
@@ -123,7 +123,7 @@ process.cumulant100 = cms.EDAnalyzer('QWCumuV2'
 	, Noffmax_ = cms.untracked.int32(150)
 	, fweight_ = cms.untracked.InputTag('TrackCorrections_HIJING_538_OFFICIAL_Mar24.root')
 	, bEff_ = cms.untracked.bool(True)
-	, cmode_ = cms.untracked.int32(2)
+	, cmode_ = cms.untracked.int32(1)
 )
 
 process.cumulant130 = process.cumulant100.clone()

@@ -42,7 +42,6 @@ process.source.lumisToProcess.extend(myLumis)
 process.cumulant = cms.EDAnalyzer('QWCumuV2'
 	, tracks_ = cms.untracked.InputTag('generalTracks')
 	, centrality_ = cms.InputTag("centralityBin")
-	, dzdzerror_ = cms.untracked.double(10.)
 	, chi2_ = cms.untracked.double(40.)
 	, vertexSrc_ = cms.untracked.InputTag('offlinePrimaryVertices', "")
 	, rfpptmin_ = cms.untracked.double(0.3)

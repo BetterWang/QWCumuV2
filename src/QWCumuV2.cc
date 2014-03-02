@@ -256,6 +256,7 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	if ( bGen_ ) analyzeGen(iEvent, iSetup);
 	else analyzeData(iEvent, iSetup);
+	if ( t->Mult == 0 ) return;
 	for ( int i = 0; i < t->Mult; i++ ) {
 		q2.fill(t->Phi[i], t->weight[i]);
 		q3.fill(t->Phi[i], t->weight[i]);

@@ -114,7 +114,7 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 			if ( bFak ) cout << "!!! Apply Fak correction" << endl;
 			if ( bEff ) cout << "!!! Apply Eff correction" << endl;
 			for ( int i = 0; i < 20; i++ ) {
-				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") ) {
+				if ( streff == string("TrackCorrections_HIJING_538_OFFICIAL_Mar24.root") || streff == string("trkEff_pp_all_42X_origin.root") ) {
 					hEff_cbin[i] = (TH2D*) fEffFak->Get("rTotalEff3D");
 					hFak_cbin[i] = (TH2D*) fEffFak->Get(Form("rFak_cbin%i", i));
 				}

@@ -175,6 +175,8 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	initQ();
 //	cout << cq2->name() << endl;
 	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
+	ntResult->SetAutoFlush(-3000000);
+	ntResult->SetAutoSave(-30000000);
 
 //	cout << "!! initQ" << endl;
 }

@@ -156,7 +156,6 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	memset(t, 0, sizeof(QWEvent));
 //	cout << "!! after t" << endl;
 	//
-	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		hPt[cent]       = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
 		if ( bPhiEta ) {
@@ -308,6 +307,7 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	double res[27] = { double(t->Noff), double(t->Mult), double(t->Cent),
 		C22,C24,C26,C28,iC22,iC24,iC26,iC28,wC22,wC24,wC26,wC28,C32,C34,C36,C38,iC32,iC34,iC36,iC38,wC32,wC34,wC36,wC38};
 
+	fs->cd();
 	ntResult->Fill(res);
 
 	doneQ();

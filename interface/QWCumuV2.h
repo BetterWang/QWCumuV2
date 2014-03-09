@@ -61,6 +61,7 @@ class QWCumuV2 : public edm::EDAnalyzer {
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
+		edm::Service<TFileService> fs;
 	/////////////////////////////////////////////
 		int getNoffCent(const edm::Event&, const edm::EventSetup&, int& Noff);
 		//TRandom3 * gRandom;

@@ -156,16 +156,19 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 	memset(t, 0, sizeof(QWEvent));
 //	cout << "!! after t" << endl;
 	//
+	edm::Service<TFileService> fs;
 	for ( int cent = 0; cent < nCentBins; cent++ ) {
 		hPt[cent]       = fs->make<TH1D>(Form("hPt_%i", cent), "", 20000, 0, 100);
 		if ( bPhiEta ) {
 			for ( int i = 0; i < nPtBins; i++ ) {
+				cout << "!! new histo cent = " << cent << " of " << nCentBins << "\t ipt = " << i  << " of " << nPtBins << endl;
 				hPhiEta[cent][i][0] = fs->make<TH2D>(Form("hPhiEta_%i_%i_0", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
 				hPhiEta[cent][i][1] = fs->make<TH2D>(Form("hPhiEta_%i_%i_1", cent, i), "", 512, -Pi, Pi, 480, -2.4, 2.4);
 			}
 		}
 	}
 	for ( int cent = 0; cent < 20; cent++ ) {
+		cout << "!! new histo cent = " << cent << endl;
 		hdNdPtdEta[cent] = fs->make<TH2D>(Form("hdNdPtdEta_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 		hdNdPtdEtaPt[cent] = fs->make<TH2D>(Form("hdNdPtdEtaPt_%i", cent), Form("hdNdPtdEta_%i", cent), nEtaBins, etabins, 38, fakpt );
 	}
@@ -173,7 +176,8 @@ QWCumuV2::QWCumuV2(const edm::ParameterSet& iConfig)
 
 	initQ();
 //	cout << cq2->name() << endl;
-	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
+//	ntResult = new TNtupleD("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
+	ntResult = fs->make<TNtupleD>("ntResult",cq2->name(),"Noff:Mult:Cent:C22:C24:C26:C28:iC22:iC24:iC26:iC28:wC22:wC24:wC26:wC28:C32:C34:C36:C38:iC32:iC34:iC36:iC38:wC32:wC34:wC36:wC38");
 	ntResult->SetAutoFlush(-3000000);
 	ntResult->SetAutoSave(-30000000);
 
@@ -307,7 +311,6 @@ QWCumuV2::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	double res[27] = { double(t->Noff), double(t->Mult), double(t->Cent),
 		C22,C24,C26,C28,iC22,iC24,iC26,iC28,wC22,wC24,wC26,wC28,C32,C34,C36,C38,iC32,iC34,iC36,iC38,wC32,wC34,wC36,wC38};
 
-	fs->cd();
 	ntResult->Fill(res);
 
 	doneQ();

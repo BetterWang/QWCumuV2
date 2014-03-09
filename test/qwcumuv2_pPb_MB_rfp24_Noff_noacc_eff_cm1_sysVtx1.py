@@ -23,12 +23,12 @@ process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
 )
 
-fN = cms.untracked.vstring();
-for line in open('flist').read().splitlines():
-	fN.append('file:'+line);
-
+#fN = cms.untracked.vstring();
+#for line in open('flist').read().splitlines():
+#	fN.append('file:'+line);
+#
 process.source = cms.Source("PoolSource",
-	fileNames = fN
+	fileNames = cms.untracked.vstring()
 )
 
 import FWCore.PythonUtilities.LumiList as LumiList

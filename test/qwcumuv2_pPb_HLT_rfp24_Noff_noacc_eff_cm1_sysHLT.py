@@ -23,22 +23,22 @@ process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
 )
 
-fN = cms.untracked.vstring();
-for line in open('flist').read().splitlines():
-	fN.append('file:'+line);
-
+#fN = cms.untracked.vstring();
+#for line in open('flist').read().splitlines():
+#	fN.append('file:'+line);
+#
 process.source = cms.Source("PoolSource",
-	fileNames = fN
+	fileNames = cms.untracked.vstring()
 )
 
-import FWCore.PythonUtilities.LumiList as LumiList
-import FWCore.ParameterSet.Types as CfgTypes
-process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-JSONfile = 'Cert_210498-211631_HI_PromptReco_Collisions13_JSON_v2.txt'
-myLumis = LumiList.LumiList(filename = JSONfile).getCMSSWString().split(',')
-process.source.lumisToProcess.extend(myLumis)
-
-
+#import FWCore.PythonUtilities.LumiList as LumiList
+#import FWCore.ParameterSet.Types as CfgTypes
+#process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+#JSONfile = 'Cert_210498-211631_HI_PromptReco_Collisions13_JSON_v2.txt'
+#myLumis = LumiList.LumiList(filename = JSONfile).getCMSSWString().split(',')
+#process.source.lumisToProcess.extend(myLumis)
+#
+#
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 
 process.hltHM100 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()

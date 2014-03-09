@@ -321,6 +321,7 @@ QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	using namespace edm;
 	using namespace reco;
 
+	t->Mult = 0;
 	// track
 	Handle< std::vector<GenParticle> > tracks;
 	iEvent.getByLabel(tracks_,tracks);
@@ -337,7 +338,6 @@ QWCumuV2::analyzeGen(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		t->Noff++;
 	}
 	t->Cent = 0;
-	t->Mult = 0;
 	for ( std::vector<GenParticle>::const_iterator itTrack = tracks->begin();
 			itTrack != tracks->end();
 			++itTrack
@@ -364,6 +364,7 @@ QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	using namespace edm;
 	using namespace reco;
 
+	t->Mult = 0;
 	// vertex
 	Handle<VertexCollection> vertexCollection;
 	iEvent.getByLabel(vertexSrc_, vertexCollection);
@@ -407,7 +408,6 @@ QWCumuV2::analyzeData(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// track
 	Handle<TrackCollection> tracks;
 	iEvent.getByLabel(tracks_,tracks);
-	t->Mult = 0;
 	t->Cent = bin;
 	t->vz = vz;
 	//cout << __LINE__ << "\t" << bin << endl;

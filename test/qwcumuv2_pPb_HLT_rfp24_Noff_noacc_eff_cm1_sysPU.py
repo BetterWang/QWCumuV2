@@ -23,22 +23,22 @@ process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound')
 )
 
-fN = cms.untracked.vstring();
-for line in open('flist').read().splitlines():
-	fN.append('file:'+line);
-
+#fN = cms.untracked.vstring();
+#for line in open('flist').read().splitlines():
+#	fN.append('file:'+line);
+#
 process.source = cms.Source("PoolSource",
-	fileNames = fN
+	fileNames = cms.untracked.vstring()
 )
 
-import FWCore.PythonUtilities.LumiList as LumiList
-import FWCore.ParameterSet.Types as CfgTypes
-process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
-JSONfile = 'Cert_210498-211631_HI_PromptReco_Collisions13_JSON_v2.txt'
-myLumis = LumiList.LumiList(filename = JSONfile).getCMSSWString().split(',')
-process.source.lumisToProcess.extend(myLumis)
-
-
+#import FWCore.PythonUtilities.LumiList as LumiList
+#import FWCore.ParameterSet.Types as CfgTypes
+#process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+#JSONfile = 'Cert_210498-211631_HI_PromptReco_Collisions13_JSON_v2.txt'
+#myLumis = LumiList.LumiList(filename = JSONfile).getCMSSWString().split(',')
+#process.source.lumisToProcess.extend(myLumis)
+#
+#
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 
 process.hltHM100 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
@@ -147,43 +147,43 @@ process.TFileService = cms.Service("TFileService",
 
 
 #process.p = cms.Path(process.PAcollisionEventSelection*process.pACentrality*process.cumulant)
-#process.p100 = cms.Path(process.hltHM100*process.cumulant100)
-#process.p130 = cms.Path(process.hltHM130*process.cumulant130)
-#process.p160 = cms.Path(process.hltHM160*process.cumulant160)
-#process.p190 = cms.Path(process.hltHM190*process.cumulant190)
-#process.p220 = cms.Path(process.hltHM220*process.cumulant220)
+process.p100 = cms.Path(process.hltHM100*process.cumulant100)
+process.p130 = cms.Path(process.hltHM130*process.cumulant130)
+process.p160 = cms.Path(process.hltHM160*process.cumulant160)
+process.p190 = cms.Path(process.hltHM190*process.cumulant190)
+process.p220 = cms.Path(process.hltHM220*process.cumulant220)
 
-import sys
-
-switch = sys.argv[2];
-if switch == '0':
-	process.cumulant = process.cumulant100.clone()
-	process.p = cms.Path(process.hltHM100*process.cumulant)
-	process.TFileService.fileName = cms.string('cumu_100.root')
-if switch == '1':
-	process.cumulant = process.cumulant130.clone()
-	process.p = cms.Path(process.hltHM130*process.cumulant)
-	process.TFileService.fileName = cms.string('cumu_130.root')
-if switch == '2':
-	process.cumulant = process.cumulant160.clone()
-	process.p = cms.Path(process.hltHM160*process.cumulant)
-	process.TFileService.fileName = cms.string('cumu_160.root')
-if switch == '3':
-	process.cumulant = process.cumulant190.clone()
-	process.p = cms.Path(process.hltHM190*process.cumulant)
-	process.TFileService.fileName = cms.string('cumu_190.root')
-if switch == '4':
-	process.cumulant = process.cumulant220.clone()
-	process.p = cms.Path(process.hltHM220*process.cumulant)
-	process.TFileService.fileName = cms.string('cumu_220.root')
-
-process.schedule = cms.Schedule(
-	process.p
-)
+#import sys
+#
+#switch = sys.argv[2];
+#if switch == '0':
+#	process.cumulant = process.cumulant100.clone()
+#	process.p = cms.Path(process.hltHM100*process.cumulant)
+#	process.TFileService.fileName = cms.string('cumu_100.root')
+#if switch == '1':
+#	process.cumulant = process.cumulant130.clone()
+#	process.p = cms.Path(process.hltHM130*process.cumulant)
+#	process.TFileService.fileName = cms.string('cumu_130.root')
+#if switch == '2':
+#	process.cumulant = process.cumulant160.clone()
+#	process.p = cms.Path(process.hltHM160*process.cumulant)
+#	process.TFileService.fileName = cms.string('cumu_160.root')
+#if switch == '3':
+#	process.cumulant = process.cumulant190.clone()
+#	process.p = cms.Path(process.hltHM190*process.cumulant)
+#	process.TFileService.fileName = cms.string('cumu_190.root')
+#if switch == '4':
+#	process.cumulant = process.cumulant220.clone()
+#	process.p = cms.Path(process.hltHM220*process.cumulant)
+#	process.TFileService.fileName = cms.string('cumu_220.root')
+#
 #process.schedule = cms.Schedule(
-#	process.p100,
-#	process.p130,
-#	process.p160,
-#	process.p190,
-#	process.p220,
+#	process.p
 #)
+process.schedule = cms.Schedule(
+	process.p100,
+	process.p130,
+	process.p160,
+	process.p190,
+	process.p220,
+)
